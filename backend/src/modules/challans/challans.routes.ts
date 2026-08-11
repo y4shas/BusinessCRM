@@ -6,6 +6,7 @@ import { authenticate, authorize } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
 import { NotFoundError, ConflictError, ValidationError } from '../../utils/errors';
 import { generateChallanNumber } from '../../utils/challanNumber';
+import { generateChallanPDF } from '../../utils/challanPdf';
 
 const router = Router();
 router.use(authenticate);
@@ -297,6 +298,41 @@ router.post('/:id/cancel', authorize('ADMIN', 'SALES'), async (req: Request, res
   });
 
   res.json({ success: true, data: cancelled });
+});
+
+// GET /challans/:id/pdf
+router.get('/:id/pdf', authorize('ADMIN', 'SALES', 'ACCOUNTS'), async (req: Request, res: Response) => {
+  const id = parseInt(String(req.params.id), 10);
+
+  const challan = await prisma.challan.findUnique({
+    where: { id },
+    include: {
+      customer: true,
+      createdBy: { select: { name: true } },
+      items: true,
+    },
+  });
+
+  if (!challan) throw new NotFoundError('Challan not found');
+
+  generateChallanPDF(
+    {
+      challanNumber: challan.challanNumber,
+      status: challan.status,
+      createdAt: challan.createdAt,
+      createdBy: challan.createdBy,
+      customer: challan.customer,
+      items: challan.items.map((item) => ({
+        productNameSnap: item.productNameSnap,
+        skuSnap: item.skuSnap,
+        unitPriceSnap: Number(item.unitPriceSnap),
+        quantity: item.quantity,
+        lineTotal: Number(item.lineTotal),
+      })),
+      totalQuantity: challan.totalQuantity,
+    },
+    res
+  );
 });
 
 export default router;

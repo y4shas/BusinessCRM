@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { challansApi, customersApi, productsApi } from '../api';
-import { FileText, Plus, Search, X, Loader2, CheckCircle, XCircle, Trash2 } from 'lucide-react';
+import { FileText, Plus, Search, X, Loader2, CheckCircle, XCircle, Trash2, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -145,6 +145,7 @@ function CreateChallanModal({ onClose }: { onClose: () => void }) {
 function ChallanDetailModal({ challan, onClose, onRefresh }: { challan: any; onClose: () => void; onRefresh: () => void }) {
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const handleConfirm = async () => {
     setConfirming(true);
@@ -170,6 +171,18 @@ function ChallanDetailModal({ challan, onClose, onRefresh }: { challan: any; onC
       toast.error(err.response?.data?.message || 'Failed to cancel');
     } finally {
       setCancelling(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    setDownloading(true);
+    try {
+      await challansApi.downloadPdf(challan.id, challan.challanNumber);
+      toast.success('PDF downloaded!');
+    } catch {
+      toast.error('Failed to generate PDF');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -228,6 +241,10 @@ function ChallanDetailModal({ challan, onClose, onRefresh }: { challan: any; onC
         </div>
         <div className="modal-footer">
           <button className="btn btn-secondary" onClick={onClose}>Close</button>
+          <button className="btn btn-secondary" onClick={handleDownloadPdf} disabled={downloading} style={{ marginRight: 'auto' }}>
+            {downloading ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+            Download PDF
+          </button>
           {challan.status !== 'CANCELLED' && (
             <button className="btn btn-danger" onClick={handleCancel} disabled={cancelling}>
               {cancelling ? <Loader2 size={15} className="animate-spin" /> : <XCircle size={15} />}

@@ -74,6 +74,15 @@ export const challansApi = {
   update: (id: number, data: any) => api.put(`/challans/${id}`, data),
   confirm: (id: number) => api.post(`/challans/${id}/confirm`),
   cancel: (id: number) => api.post(`/challans/${id}/cancel`),
+  downloadPdf: async (id: number, challanNumber: string): Promise<void> => {
+    const response = await api.get(`/challans/${id}/pdf`, { responseType: 'blob' });
+    const url = URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${challanNumber}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  },
 };
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
