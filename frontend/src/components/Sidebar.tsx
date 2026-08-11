@@ -62,13 +62,9 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        {/* Core */}
-        {isAdmin && (
-          <>
-            <span className="sidebar-section-label">Overview</span>
-            <SidebarNavItem to="/dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
-          </>
-        )}
+        {/* Core — visible to all */}
+        <span className="sidebar-section-label">Overview</span>
+        <SidebarNavItem to="/dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
 
         <span className="sidebar-section-label">CRM</span>
         {hasRole('ADMIN', 'SALES') && (

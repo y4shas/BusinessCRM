@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedLayout from './components/ProtectedLayout';
 import LoginPage from './pages/Login';
 import DashboardPage from './pages/Dashboard';
@@ -11,6 +11,19 @@ import ProductsPage from './pages/Products';
 import ChallansPage from './pages/Challans';
 import UsersPage from './pages/Users';
 import './index.css';
+
+/** Redirect each role to their natural landing page */
+function RoleRedirect() {
+  const { user } = useAuth();
+  if (!user) return <Navigate to="/login" replace />;
+  switch (user.role) {
+    case 'ADMIN':      return <Navigate to="/dashboard" replace />;
+    case 'SALES':      return <Navigate to="/customers" replace />;
+    case 'WAREHOUSE':  return <Navigate to="/products" replace />;
+    case 'ACCOUNTS':   return <Navigate to="/challans" replace />;
+    default:           return <Navigate to="/challans" replace />;
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,7 +45,7 @@ function App() {
 
             {/* Protected */}
             <Route element={<ProtectedLayout />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<RoleRedirect />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/customers" element={<CustomersPage />} />
               <Route path="/products" element={<ProductsPage />} />

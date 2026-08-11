@@ -51,3 +51,22 @@
 - Need: RDS endpoint, port, username, password, database name
 - Will configure `backend/.env` with `DATABASE_URL`
 - Will then run `prisma migrate deploy` + `prisma db seed` against RDS
+
+### 01:18 — 🗄️ Milestone: RDS Connected, Migrations Applied, Seed Complete
+
+**RDS Details**
+- Host: `erp-crm-rds.cn2iooeu4vyo.ap-south-1.rds.amazonaws.com` (ap-south-1)
+- Database: `mini_erp_crm` (auto-created by Prisma)
+- SSL cert: `global-bundle.pem` downloaded and in repo
+
+**Completed**
+- ✅ `backend/.env` created with live RDS credentials (gitignored)
+- ✅ Prisma migration `20260811194834_init` applied — all 7 tables created
+- ✅ Seed ran via `npx tsx`: 4 users, 5 products, 3 customers inserted
+- ✅ Fixed `ts-node` → `tsx` (incompatible with TypeScript 7 + Node 23)
+- ✅ Backend health check: `GET /health` → `{ status: "ok" }`
+- ✅ Auth API: `POST /auth/login` (admin@demo.local) → JWT issued, role: ADMIN
+- ✅ Frontend dev server running at `http://localhost:5173/`
+- ✅ Committed & pushed to GitHub (commit `0e521be`)
+
+**Full stack is now running end-to-end locally against AWS RDS**
