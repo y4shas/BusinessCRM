@@ -1,0 +1,66 @@
+version: "3.9"
+
+# ─── DEVELOPMENT: spins up a local MySQL container ───────────────────────────
+# Usage: docker compose up -d
+# Note: For prod, use docker-compose.prod.yml (connects to AWS RDS)
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mini_erp_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: devpassword
+      MYSQL_DATABASE: mini_erp_crm
+      MYSQL_USER: mini_erp_user
+      MYSQL_PASSWORD: devpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pdevpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: mini_erp_backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      DATABASE_URL: mysql://mini_erp_user:devpassword@db:3306/mini_erp_crm
+      NODE_ENV: development
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: mini_erp_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: mini_erp_nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  mysql_data:

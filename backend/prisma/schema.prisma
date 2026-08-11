@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  SALES
+  WAREHOUSE
+  ACCOUNTS
+}
+
+enum CustomerType {
+  RETAIL
+  WHOLESALE
+  DISTRIBUTOR
+}
+
+enum CustomerStatus {
+  LEAD
+  ACTIVE
+  INACTIVE
+}
+
+enum MovementType {
+  IN
+  OUT
+}
+
+enum ChallanStatus {
+  DRAFT
+  CONFIRMED
+  CANCELLED
+}
+
+// ─── Models ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  challans   Challan[]       @relation("CreatedByUser")
+  stockMoves StockMovement[] @relation("CreatedByUser")
+  followUps  FollowUp[]      @relation("CreatedByUser")
+}
+
+model Customer {
+  id           Int            @id @default(autoincrement())
+  name         String
+  mobile       String
+  email        String?
+  businessName String?
+  gstNumber    String?
+  customerType CustomerType
+  address      String?
+  status       CustomerStatus @default(LEAD)
+  followUpDate DateTime?
+  notes        String?        @db.Text
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  challans  Challan[]
+  followUps FollowUp[]
+}
+
+model FollowUp {
+  id           Int       @id @default(autoincrement())
+  customerId   Int
+  customer     Customer  @relation(fields: [customerId], references: [id])
+  note         String    @db.Text
+  followUpDate DateTime?
+  createdById  Int
+  createdBy    User      @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdAt    DateTime  @default(now())
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  name          String
+  sku           String   @unique
+  category      String?
+  unitPrice     Decimal  @db.Decimal(10, 2)
+  currentStock  Int      @default(0)
+  minStockAlert Int      @default(0)
+  location      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  stockMoves   StockMovement[]
+  challanItems ChallanItem[]
+}
+
+model StockMovement {
+  id           Int          @id @default(autoincrement())
+  productId    Int
+  product      Product      @relation(fields: [productId], references: [id])
+  quantity     Int
+  movementType MovementType
+  reason       String?
+  createdById  Int
+  createdBy    User         @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdAt    DateTime     @default(now())
+}
+
+model Challan {
+  id            Int           @id @default(autoincrement())
+  challanNumber String        @unique
+  customerId    Int
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  totalQuantity Int
+  status        ChallanStatus @default(DRAFT)
+  createdById   Int
+  createdBy     User          @relation("CreatedByUser", fields: [createdById], references: [id])
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items ChallanItem[]
+}
+
+model ChallanItem {
+  id        Int     @id @default(autoincrement())
+  challanId Int
+  challan   Challan @relation(fields: [challanId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Snapshot fields captured at time of adding to challan
+  productNameSnap String
+  skuSnap         String
+  unitPriceSnap   Decimal @db.Decimal(10, 2)
+
+  quantity  Int
+  lineTotal Decimal @db.Decimal(10, 2)
+}
