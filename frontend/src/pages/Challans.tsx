@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { challansApi, customersApi, productsApi } from '../api';
-import { FileText, Plus, Search, X, Loader2, CheckCircle, XCircle, Trash2, Download } from 'lucide-react';
+import { FileText, Plus, X, Loader2, CheckCircle, XCircle, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -51,7 +51,7 @@ function CreateChallanModal({ onClose }: { onClose: () => void }) {
     }
   };
 
-  const productMap = new Map((products ?? []).map((p: any) => [p.id, p]));
+  const productMap = new Map<number, any>((products ?? []).map((p: any) => [p.id, p]));
 
   const totalQty = items.reduce((s, i) => s + (i.quantity || 0), 0);
   const totalValue = items.reduce((s, i) => {
@@ -113,7 +113,7 @@ function CreateChallanModal({ onClose }: { onClose: () => void }) {
                         </span>
                       )}
                       <button type="button" className="btn btn-danger btn-icon btn-sm" onClick={() => removeItem(i)} disabled={items.length === 1}>
-                        <Trash2 size={13} />
+                        <X size={13} />
                       </button>
                     </div>
                   );
@@ -264,7 +264,6 @@ function ChallanDetailModal({ challan, onClose, onRefresh }: { challan: any; onC
 }
 
 export default function ChallansPage() {
-  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [showCreate, setShowCreate] = useState(false);
@@ -300,7 +299,7 @@ export default function ChallansPage() {
 
       <div className="page-content">
         <div className="toolbar">
-          <select className="form-select" style={{ width: 'auto' }} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
+          <select className="form-select" style={{ width: 'auto'}} value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}>
             <option value="">All Status</option>
             <option value="DRAFT">Draft</option>
             <option value="CONFIRMED">Confirmed</option>

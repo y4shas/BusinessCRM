@@ -1,8 +1,6 @@
-import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
-import { Loader2 } from 'lucide-react';
 
 export default function ProtectedLayout() {
   const { user, isLoading } = useAuth();

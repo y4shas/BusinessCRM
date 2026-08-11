@@ -3,7 +3,6 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   LayoutDashboard, Users, Package, FileText, LogOut, Building2, UserCog,
-  ChevronRight
 } from 'lucide-react';
 
 interface NavItemProps {
