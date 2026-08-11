@@ -82,7 +82,16 @@ function AdminDashboard({ data }: { data: any }) {
             <BarChart data={customerChartData} barCategoryGap="40%">
               <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <Tooltip
+               contentStyle={{
+                 background: 'var(--bg-card)',
+                 border: '1px solid var(--border)',
+                 borderRadius: 8,
+                 color: 'var(--text-primary)',
+               }}
+               itemStyle={{ color: 'var(--text-primary)' }}
+               cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+              />
               <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                 <Cell fill="#f59e0b" /><Cell fill="#4f8ef7" /><Cell fill="#9da3b4" />
               </Bar>
@@ -95,7 +104,16 @@ function AdminDashboard({ data }: { data: any }) {
             <BarChart data={challanChartData} barCategoryGap="40%">
               <XAxis dataKey="name" tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fill: 'var(--text-muted)', fontSize: 12 }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-primary)' }} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+              <Tooltip
+               contentStyle={{
+                 background: 'var(--bg-card)',
+                 border: '1px solid var(--border)',
+                 borderRadius: 8,
+                 color: 'var(--text-primary)',
+               }}
+               itemStyle={{ color: 'var(--text-primary)' }}
+               cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+              />
               <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                 <Cell fill="#f59e0b" /><Cell fill="#10b981" /><Cell fill="#ef4444" />
               </Bar>

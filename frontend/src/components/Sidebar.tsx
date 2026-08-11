@@ -1,16 +1,10 @@
-import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import React from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard,
-  Users,
-  Package,
-  FileText,
-  LogOut,
-  Building2,
-  UserCog,
-  ChevronRight,
-} from "lucide-react";
+  LayoutDashboard, Users, Package, FileText, LogOut, Building2, UserCog,
+  ChevronRight
+} from 'lucide-react';
 
 interface NavItemProps {
   to: string;
@@ -22,7 +16,7 @@ function SidebarNavItem({ to, icon, label }: NavItemProps) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
     >
       {icon}
       <span style={{ flex: 1 }}>{label}</span>
@@ -36,22 +30,21 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate('/login');
   };
 
-  const initials =
-    user?.name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2) ?? "U";
+  const initials = user?.name
+    .split(' ')
+    .map(n => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2) ?? 'U';
 
   const roleColors: Record<string, string> = {
-    ADMIN: "badge-purple",
-    SALES: "badge-blue",
-    WAREHOUSE: "badge-amber",
-    ACCOUNTS: "badge-green",
+    ADMIN: 'badge-purple',
+    SALES: 'badge-blue',
+    WAREHOUSE: 'badge-amber',
+    ACCOUNTS: 'badge-green',
   };
 
   return (
@@ -71,52 +64,33 @@ export default function Sidebar() {
       <nav className="sidebar-nav">
         {/* Core — visible to all */}
         <span className="sidebar-section-label">Overview</span>
-        <SidebarNavItem
-          to="/dashboard"
-          icon={<LayoutDashboard size={16} />}
-          label="Dashboard"
-        />
+        <SidebarNavItem to="/dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
 
-        <span className="sidebar-section-label">CRM</span>
-        {hasRole("ADMIN", "SALES") && (
+        {hasRole('ADMIN', 'SALES') && (
           <>
-            <SidebarNavItem
-              to="/customers"
-              icon={<Users size={16} />}
-              label="Customers"
-            />
+            <span className="sidebar-section-label">CRM</span>
+            <SidebarNavItem to="/customers" icon={<Users size={16} />} label="Customers" />
           </>
         )}
 
-        <span className="sidebar-section-label">Inventory</span>
-        {hasRole("ADMIN", "SALES", "WAREHOUSE") && (
+        {hasRole('ADMIN', 'SALES', 'WAREHOUSE') && (
           <>
             <span className="sidebar-section-label">Inventory</span>
-            <SidebarNavItem
-              to="/products"
-              icon={<Package size={16} />}
-              label="Products"
-            />
+            <SidebarNavItem to="/products" icon={<Package size={16} />} label="Products" />
           </>
         )}
 
-        <span className="sidebar-section-label">Sales</span>
-        {hasRole("ADMIN", "SALES", "ACCOUNTS", "WAREHOUSE") && (
-          <SidebarNavItem
-            to="/challans"
-            icon={<FileText size={16} />}
-            label="Challans"
-          />
+        {hasRole('ADMIN', 'SALES', 'ACCOUNTS', 'WAREHOUSE') && (
+          <>
+            <span className="sidebar-section-label">Sales</span>
+            <SidebarNavItem to="/challans" icon={<FileText size={16} />} label="Challans" />
+          </>
         )}
 
         {isAdmin && (
           <>
             <span className="sidebar-section-label">Admin</span>
-            <SidebarNavItem
-              to="/users"
-              icon={<UserCog size={16} />}
-              label="Users"
-            />
+            <SidebarNavItem to="/users" icon={<UserCog size={16} />} label="Users" />
           </>
         )}
       </nav>
@@ -128,10 +102,7 @@ export default function Sidebar() {
           <div className="user-badge-info">
             <div className="user-badge-name">{user?.name}</div>
             <div className="user-badge-role">
-              <span
-                className={`badge ${roleColors[user?.role ?? ""] ?? "badge-gray"} text-xs`}
-                style={{ padding: "1px 7px", fontSize: 10 }}
-              >
+              <span className={`badge ${roleColors[user?.role ?? ''] ?? 'badge-gray'} text-xs`} style={{ padding: '1px 7px', fontSize: 10 }}>
                 {user?.role}
               </span>
             </div>
@@ -140,12 +111,7 @@ export default function Sidebar() {
             onClick={handleLogout}
             className="btn-icon btn btn-secondary"
             title="Logout"
-            style={{
-              padding: "6px",
-              border: "none",
-              background: "transparent",
-              color: "var(--text-muted)",
-            }}
+            style={{ padding: '6px', border: 'none', background: 'transparent', color: 'var(--text-muted)' }}
           >
             <LogOut size={15} />
           </button>

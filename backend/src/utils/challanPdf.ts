@@ -25,11 +25,11 @@ interface ChallanPDFData {
 }
 
 // ── Colour palette ─────────────────────────────────────────────────────────────
-const BRAND_DARK  = '#0d0f17';
-const BRAND_BLUE  = '#4f8ef7';
-const BRAND_LIGHT = '#e8eaf0';
-const MUTED       = '#9da3b4';
-const BORDER_CLR  = '#1e2235';
+const BRAND_DARK  = '#111827';
+const BRAND_BLUE  = '#2563eb';
+const BRAND_LIGHT = '#f3f4f6';
+const MUTED       = '#6b7280';
+const BORDER_CLR  = '#d1d5db';
 const WHITE       = '#ffffff';
 const GREEN       = '#10b981';
 const AMBER       = '#f59e0b';
@@ -66,10 +66,10 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   doc.pipe(res);
 
   // ── Background ──────────────────────────────────────────────────────────────
-  doc.rect(0, 0, PAGE_W, PAGE_H).fill(BRAND_DARK);
+  doc.rect(0, 0, PAGE_W, PAGE_H).fill(WHITE);
 
   // ── Header band ─────────────────────────────────────────────────────────────
-  doc.rect(0, 0, PAGE_W, 110).fill('#141720');
+  doc.rect(0, 0, PAGE_W, 110).fill(BRAND_LIGHT);
 
   // Logo box
   doc
@@ -84,7 +84,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   // Company name
   doc
     .fontSize(18)
-    .fillColor(WHITE)
+    .fillColor(BRAND_DARK)
     .font('Helvetica-Bold')
     .text('BusinessCRM', MARGIN + 54, 28);
   doc
@@ -96,7 +96,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   // "SALES CHALLAN" label (right side)
   doc
     .fontSize(20)
-    .fillColor(WHITE)
+    .fillColor(BRAND_DARK)
     .font('Helvetica-Bold')
     .text('SALES CHALLAN', 0, 28, { width: PAGE_W - MARGIN, align: 'right' });
 
@@ -109,7 +109,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
 
   const pillColor = statusColor(data.status);
   const pillX = PAGE_W - MARGIN - 70;
-  doc.roundedRect(pillX, 68, 70, 18, 4).fill(pillColor + '33');
+  // doc.roundedRect(pillX, 68, 70, 18, 4).fill(pillColor + '33');
   doc
     .fontSize(8)
     .fillColor(pillColor)
@@ -128,14 +128,14 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
 
   y += 14;
   doc
-    .fontSize(10).fillColor(BRAND_LIGHT).font('Helvetica-Bold')
+    .fontSize(10).fillColor(BRAND_DARK).font('Helvetica-Bold')
     .text(new Date(data.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }), MARGIN, y)
     .text(data.createdBy.name, MARGIN + 160, y);
 
   // ── Customer section ─────────────────────────────────────────────────────────
   y += 30;
   // Card background
-  doc.roundedRect(MARGIN, y, CONTENT_W, 95, 8).fill('#141720');
+  doc.roundedRect(MARGIN, y, CONTENT_W, 95, 8).fill('#f9fafb');
   doc.roundedRect(MARGIN, y, 3, 95, 2).fill(BRAND_BLUE); // left accent
 
   y += 14;
@@ -145,23 +145,23 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
 
   y += 14;
   doc
-    .fontSize(13).fillColor(WHITE).font('Helvetica-Bold')
+    .fontSize(13).fillColor(BRAND_DARK).font('Helvetica-Bold')
     .text(data.customer.name, MARGIN + 14, y);
 
   if (data.customer.businessName) {
     y += 17;
-    doc.fontSize(10).fillColor(BRAND_LIGHT).font('Helvetica').text(data.customer.businessName, MARGIN + 14, y);
+    doc.fontSize(10).fillColor(BRAND_DARK).font('Helvetica').text(data.customer.businessName, MARGIN + 14, y);
   }
 
   y += 16;
   const contactParts: string[] = [];
-  if (data.customer.mobile) contactParts.push(`📞 ${data.customer.mobile}`);
-  if (data.customer.email)  contactParts.push(`✉ ${data.customer.email}`);
+  if (data.customer.mobile) contactParts.push(`Phone: ${data.customer.mobile}`);
+  if (data.customer.email)  contactParts.push(`Email: ${data.customer.email}`);
   doc.fontSize(9).fillColor(MUTED).font('Helvetica').text(contactParts.join('   '), MARGIN + 14, y);
 
   if (data.customer.address) {
     y += 14;
-    doc.fontSize(9).fillColor(MUTED).text(`📍 ${data.customer.address}`, MARGIN + 14, y, { width: CONTENT_W - 28 });
+    doc.fontSize(9).fillColor(MUTED).text(`Address: ${data.customer.address}`, MARGIN + 14, y, { width: CONTENT_W - 28 });
   }
 
   if (data.customer.gstNumber) {
@@ -173,7 +173,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   y = Math.max(y + 30, 310);
 
   // Table header
-  doc.rect(MARGIN, y, CONTENT_W, 26).fill('#141720');
+  doc.rect(MARGIN, y, CONTENT_W, 26).fill(BRAND_LIGHT);
 
   const cols = {
     no:    { x: MARGIN + 10,              w: 24 },
@@ -185,7 +185,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   };
 
   const hdrY = y + 8;
-  doc.fontSize(8).fillColor(MUTED).font('Helvetica-Bold');
+  doc.fontSize(8).fillColor(BRAND_DARK).font('Helvetica-Bold');
   doc.text('#',           cols.no.x,    hdrY);
   doc.text('PRODUCT',     cols.name.x,  hdrY);
   doc.text('SKU',         cols.sku.x,   hdrY);
@@ -198,16 +198,16 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
   // Table rows
   data.items.forEach((item, i) => {
     const rowH = 30;
-    const bg = i % 2 === 0 ? '#141720' : '#1a1d2e';
+    const bg = i % 2 === 0 ? WHITE : '#f8fafc';
     doc.rect(MARGIN, y, CONTENT_W, rowH).fill(bg);
 
     const rowY = y + 9;
-    doc.fontSize(9).fillColor(BRAND_LIGHT).font('Helvetica');
+    doc.fontSize(9).fillColor(BRAND_DARK).font('Helvetica');
     doc.text(String(i + 1),           cols.no.x,    rowY);
     doc.text(item.productNameSnap,    cols.name.x,  rowY, { width: cols.name.w - 4, ellipsis: true });
     doc.fillColor(MUTED).text(item.skuSnap, cols.sku.x, rowY, { width: cols.sku.w - 4 });
-    doc.fillColor(BRAND_LIGHT).text(
-      `₹${Number(item.unitPriceSnap).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+    doc.fillColor(BRAND_DARK).text(
+      `Rs ${Number(item.unitPriceSnap).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       cols.price.x, rowY, { width: cols.price.w, align: 'right' }
     );
     doc.text(String(item.quantity), cols.qty.x, rowY, { width: cols.qty.w, align: 'right' });
@@ -215,7 +215,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
       .fillColor(GREEN)
       .font('Helvetica-Bold')
       .text(
-        `₹${Number(item.lineTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+        `Rs ${Number(item.lineTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
         cols.total.x, rowY, { width: cols.total.w, align: 'right' }
       );
 
@@ -224,7 +224,7 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
 
   // ── Totals footer bar ─────────────────────────────────────────────────────────
   y += 4;
-  doc.rect(MARGIN, y, CONTENT_W, 46).fill('#141720');
+  doc.rect(MARGIN, y, CONTENT_W, 46).fill(BRAND_LIGHT);
   doc.roundedRect(MARGIN, y, 3, 46, 2).fill(BRAND_BLUE);
 
   // Grand total
@@ -236,11 +236,11 @@ export function generateChallanPDF(data: ChallanPDFData, res: Response): void {
     .text('GRAND TOTAL', PAGE_W - MARGIN - 160, y + 10, { width: 160, align: 'right' });
 
   doc
-    .fontSize(16).fillColor(WHITE).font('Helvetica-Bold')
+    .fontSize(16).fillColor(BRAND_DARK).font('Helvetica-Bold')
     .text(String(data.totalQuantity), MARGIN + 14, y + 24)
     .fillColor(GREEN)
     .text(
-      `₹${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
+      `Rs ${grandTotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`,
       PAGE_W - MARGIN - 160, y + 24, { width: 160, align: 'right' }
     );
 
