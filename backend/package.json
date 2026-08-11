@@ -4,13 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "dev": "npx tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "prisma:generate": "npx prisma generate",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:deploy": "npx prisma migrate deploy",
-    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed": "npx tsx prisma/seed.ts",
     "prisma:studio": "npx prisma studio"
   },
   "keywords": [],
@@ -18,7 +18,7 @@
   "license": "ISC",
   "type": "commonjs",
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "npx tsx prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
