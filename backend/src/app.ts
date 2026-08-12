@@ -18,7 +18,16 @@ import { errorHandler } from './middleware/errorHandler';
 const app = express();
 
 // ── Security & Parsing Middleware ──────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "upgrade-insecure-requests": null,
+      },
+    },
+  })
+);
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN || '*',
