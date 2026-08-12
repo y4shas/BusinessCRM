@@ -4,7 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Building2, Lock, Mail, Loader2, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const SHOW_TEST_CREDENTIALS = import.meta.env.VITE_SHOW_TEST_CREDENTIALS === 'true';
+// const SHOW_TEST_CREDENTIALS = import.meta.env.VITE_SHOW_TEST_CREDENTIALS === 'true';
+const SHOW_TEST_CREDENTIALS = true;
 
 const TEST_ACCOUNTS = [
   { role: 'Admin', email: 'admin@demo.local', password: 'Admin@123', badge: 'badge-purple' },
