@@ -1,0 +1,494 @@
+openapi: 3.0.0
+info:
+  title: BusinessCRM API
+  version: 1.0.0
+  description: A full-stack business operations portal with CRM, inventory, and challan management.
+
+servers:
+  - url: /api/v1
+    description: Current Base URL
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/login:
+    post:
+      summary: Login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: user@demo.local
+                password:
+                  type: string
+                  example: Password123
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        type: object
+                      token:
+                        type: string
+
+  /auth/me:
+    get:
+      summary: Get current user
+      responses:
+        '200':
+          description: OK
+
+  /auth/logout:
+    post:
+      summary: Logout
+      responses:
+        '200':
+          description: OK
+
+  /dashboard/summary:
+    get:
+      summary: Dashboard summary
+      responses:
+        '200':
+          description: Returns role-scoped dashboard metrics
+
+  /customers:
+    get:
+      summary: List Customers
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                mobile: { type: string }
+                email: { type: string }
+                businessName: { type: string }
+                gstNumber: { type: string }
+                customerType: { type: string }
+                address: { type: string }
+                status: { type: string }
+                notes: { type: string }
+      responses:
+        '200':
+          description: Created
+
+  /customers/{id}:
+    get:
+      summary: Get Customer Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update Customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete Customer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted
+
+  /customers/{id}/follow-ups:
+    post:
+      summary: Add Follow-up
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note: { type: string }
+                nextFollowUp: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Created
+    get:
+      summary: List Follow-ups
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /products:
+    get:
+      summary: List Products
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: lowStock
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create Product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                sku: { type: string }
+                category: { type: string }
+                unitPrice: { type: number }
+                currentStock: { type: integer }
+                minStockAlert: { type: integer }
+                location: { type: string }
+      responses:
+        '200':
+          description: Created
+
+  /products/{id}:
+    get:
+      summary: Get Product Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+    put:
+      summary: Update Product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Updated
+
+  /products/{id}/stock-movements:
+    post:
+      summary: Record Stock Movement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                movementType: { type: string, example: IN }
+                quantity: { type: integer }
+                reason: { type: string }
+      responses:
+        '200':
+          description: Created
+    get:
+      summary: List Stock Movements
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /products/{id}/image:
+    post:
+      summary: Upload Product Image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Image uploaded
+    delete:
+      summary: Delete Product Image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Image deleted
+
+  /challans:
+    get:
+      summary: List Challans
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create Challan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerId: { type: integer }
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      productId: { type: integer }
+                      quantity: { type: integer }
+      responses:
+        '200':
+          description: Created
+    put:
+      summary: Update Challan
+      responses:
+        '200':
+          description: Updated
+
+  /challans/{id}:
+    get:
+      summary: Get Challan Details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: OK
+
+  /challans/{id}/confirm:
+    post:
+      summary: Confirm Challan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Confirmed
+        '409':
+          description: Insufficient stock
+
+  /challans/{id}/cancel:
+    post:
+      summary: Cancel Challan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cancelled
+
+  /challans/{id}/pdf:
+    get:
+      summary: Download PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: PDF stream
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  /users:
+    get:
+      summary: List Users (Admin Only)
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Create User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+                name: { type: string }
+                role: { type: string, example: ADMIN }
+      responses:
+        '200':
+          description: Created
+    patch:
+      summary: Update User
+      responses:
+        '200':
+          description: Updated
+
+  /users/{id}:
+    put:
+      summary: Update User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Updated
+    delete:
+      summary: Delete User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Deleted

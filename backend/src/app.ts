@@ -3,6 +3,9 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import path from 'path';
 
 import authRoutes from './modules/auth/auth.routes';
 import usersRoutes from './modules/users/users.routes';
@@ -40,6 +43,13 @@ app.use(`${API_PREFIX}/customers`, customersRoutes);
 app.use(`${API_PREFIX}/products`, productsRoutes);
 app.use(`${API_PREFIX}/challans`, challansRoutes);
 app.use(`${API_PREFIX}/dashboard`, dashboardRoutes);
+
+// ── Swagger UI ─────────────────────────────────────────────────────────────────
+const swaggerDocument = YAML.load(path.join(__dirname, '../openapi.yaml'));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'BusinessCRM API Docs'
+}));
 
 // ── 404 Handler ────────────────────────────────────────────────────────────────
 app.use((_req, res) => {
