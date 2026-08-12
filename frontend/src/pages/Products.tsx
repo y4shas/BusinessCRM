@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsApi } from '../api';
-import { Package, Plus, Search, AlertTriangle, X, Loader2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Package, Plus, Search, AlertTriangle, X, Loader2, TrendingUp, TrendingDown, ImagePlus, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
@@ -181,6 +181,9 @@ export default function ProductsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editProduct, setEditProduct] = useState<any>(null);
   const [stockProduct, setStockProduct] = useState<any>(null);
+  const [uploadingId, setUploadingId] = useState<number | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [pendingUploadProduct, setPendingUploadProduct] = useState<any>(null);
   const { hasRole } = useAuth();
   const qc = useQueryClient();
   const canEdit = hasRole('ADMIN', 'WAREHOUSE');
@@ -252,6 +255,7 @@ export default function ProductsPage() {
             <table>
               <thead>
                 <tr>
+                  <th style={{ width: 52 }}></th>
                   <th>Product</th>
                   <th>SKU</th>
                   <th>Category</th>
@@ -266,6 +270,19 @@ export default function ProductsPage() {
                   const isLow = p.currentStock <= p.minStockAlert;
                   return (
                     <tr key={p.id}>
+                      <td style={{ padding: '8px 12px' }}>
+                        {p.imageUrl ? (
+                          <img
+                            src={p.imageUrl}
+                            alt={p.name}
+                            style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, display: 'block', border: '1px solid var(--border)' }}
+                          />
+                        ) : (
+                          <div style={{ width: 36, height: 36, borderRadius: 6, background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)' }}>
+                            <Package size={16} color="var(--text-muted)" />
+                          </div>
+                        )}
+                      </td>
                       <td className="td-primary">{p.name}</td>
                       <td className="td-code">{p.sku}</td>
                       <td>{p.category || <span className="text-muted">—</span>}</td>
@@ -288,6 +305,34 @@ export default function ProductsPage() {
                           {canEdit && (
                             <button className="btn btn-secondary btn-sm" onClick={() => { setEditProduct(p); setShowModal(true); }}>
                               Edit
+                            </button>
+                          )}
+                          {canEdit && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              title="Upload image"
+                              disabled={uploadingId === p.id}
+                              onClick={() => { setPendingUploadProduct(p); fileRef.current?.click(); }}
+                            >
+                              {uploadingId === p.id ? <Loader2 size={13} className="animate-spin" /> : <ImagePlus size={13} />}
+                            </button>
+                          )}
+                          {canEdit && p.imageUrl && (
+                            <button
+                              className="btn btn-danger btn-sm"
+                              title="Remove image"
+                              disabled={uploadingId === p.id}
+                              onClick={async () => {
+                                setUploadingId(p.id);
+                                try {
+                                  await productsApi.deleteImage(p.id);
+                                  qc.invalidateQueries({ queryKey: ['products'] });
+                                  toast.success('Image removed');
+                                } catch { toast.error('Failed to remove image'); }
+                                finally { setUploadingId(null); }
+                              }}
+                            >
+                              <Trash2 size={13} />
                             </button>
                           )}
                         </div>
@@ -322,6 +367,30 @@ export default function ProductsPage() {
         />
       )}
       {stockProduct && <StockMovementModal product={stockProduct} onClose={() => setStockProduct(null)} />}
+
+      {/* Hidden file input for image upload */}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        style={{ display: 'none' }}
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          e.target.value = '';
+          if (!file || !pendingUploadProduct) return;
+          setUploadingId(pendingUploadProduct.id);
+          try {
+            await productsApi.uploadImage(pendingUploadProduct.id, file);
+            qc.invalidateQueries({ queryKey: ['products'] });
+            toast.success('Image uploaded!');
+          } catch {
+            toast.error('Image upload failed. Check your S3 bucket configuration.');
+          } finally {
+            setUploadingId(null);
+            setPendingUploadProduct(null);
+          }
+        }}
+      />
     </div>
   );
 }

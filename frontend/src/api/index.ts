@@ -64,6 +64,14 @@ export const productsApi = {
   update: (id: number, data: any) => api.put(`/products/${id}`, data),
   addStockMovement: (id: number, data: any) => api.post(`/products/${id}/stock-movements`, data),
   getStockMovements: (id: number, params?: any) => api.get(`/products/${id}/stock-movements`, { params }),
+  uploadImage: (id: number, file: File) => {
+    const fd = new FormData();
+    fd.append('image', file);
+    return api.post(`/products/${id}/image`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  deleteImage: (id: number) => api.delete(`/products/${id}/image`),
 };
 
 // ─── Challans ────────────────────────────────────────────────────────────────

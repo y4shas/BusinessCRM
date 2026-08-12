@@ -4,6 +4,8 @@ import prisma from '../../utils/prisma';
 import { authenticate, authorize } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
 import { NotFoundError } from '../../utils/errors';
+import { upload, uploadToS3, deleteFromS3 } from '../../utils/s3';
+import { paramInt } from '../../utils/paramInt';
 
 const router = Router();
 router.use(authenticate);
@@ -170,6 +172,58 @@ router.get(
       data,
       meta: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
+  }
+);
+
+// POST /products/:id/image — upload product image to S3
+router.post(
+  '/:id/image',
+  authorize('ADMIN', 'WAREHOUSE'),
+  upload.single('image'),
+  async (req: Request, res: Response) => {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image file provided' });
+    }
+
+    const id = paramInt(req, 'id');
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundError('Product not found');
+
+    // Delete previous image from S3 if one exists
+    if (product.imageUrl) {
+      await deleteFromS3(product.imageUrl);
+    }
+
+    const imageUrl = await uploadToS3(req.file, 'products');
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: { imageUrl },
+    });
+
+    res.json({ success: true, data: updated });
+  }
+);
+
+// DELETE /products/:id/image — remove product image
+router.delete(
+  '/:id/image',
+  authorize('ADMIN', 'WAREHOUSE'),
+  async (req: Request, res: Response) => {
+    const id = paramInt(req, 'id');
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundError('Product not found');
+
+    if (product.imageUrl) {
+      await deleteFromS3(product.imageUrl);
+    }
+
+    const updated = await prisma.product.update({
+      where: { id },
+      data: { imageUrl: null },
+    });
+
+    res.json({ success: true, data: updated });
   }
 );
 
