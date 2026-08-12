@@ -110,6 +110,30 @@ Authorization: Bearer <token>
   ```
 - **Response:** Created stock movement object and automatically updated product `currentStock`.
 
+### 6. Upload Product Image
+- **Endpoint:** `POST /products/:id/image`
+- **Request Body:** `multipart/form-data` with an `image` field containing the file (JPEG, PNG, WebP, GIF, max 5MB).
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "data": {
+      "imageUrl": "https://<bucket>.s3.<region>.amazonaws.com/products/..."
+    }
+  }
+  ```
+
+### 7. Delete Product Image
+- **Endpoint:** `DELETE /products/:id/image`
+- **Description:** Deletes the image from S3 and removes the `imageUrl` from the product record.
+- **Response:**
+  ```json
+  {
+    "success": true,
+    "message": "Image deleted successfully"
+  }
+  ```
+
 ---
 
 ## Challans (Sales Orders)

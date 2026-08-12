@@ -89,7 +89,7 @@ Auth: `Authorization: Bearer <JWT>` on all endpoints except `/auth/login`.
 | Auth | `POST /auth/login`, `GET /auth/me`, `POST /auth/logout` |
 | Users | `GET/POST/PATCH /users` (Admin only) |
 | Customers | `GET/POST/PUT/DELETE /customers`, `POST/GET /customers/:id/follow-ups` |
-| Products | `GET/POST/PUT /products`, `POST/GET /products/:id/stock-movements` |
+| Products | `GET/POST/PUT /products`, `POST/GET /products/:id/stock-movements`, `POST/DELETE /products/:id/image` |
 | Challans | `GET/POST/PUT /challans`, `POST /challans/:id/confirm`, `POST /challans/:id/cancel` |
 | Dashboard | `GET /dashboard/summary` |
 
