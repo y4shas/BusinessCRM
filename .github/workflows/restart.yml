@@ -1,0 +1,22 @@
+name: Restart EC2 Docker on Commit
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into EC2 and restart Docker
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/BusinessCRM
+            git pull origin main
+            docker compose -f docker-compose.prod.yaml down
+            docker compose -f docker-compose.prod.yaml up -d --build
