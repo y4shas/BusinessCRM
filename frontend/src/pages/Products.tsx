@@ -14,7 +14,12 @@ const emptyForm: ProductFormData = {
   name: '', sku: '', category: '', unitPrice: '', currentStock: '0', minStockAlert: '0', location: '',
 };
 
-function ProductModal({ initial, onClose, onSave }: { initial?: any; onClose: () => void; onSave: (d: any) => Promise<void> }) {
+function ProductModal({ initial, onClose, onSave, onImageUploaded }: {
+  initial?: any;
+  onClose: () => void;
+  onSave: (d: any) => Promise<void>;
+  onImageUploaded?: () => void;
+}) {
   const [form, setForm] = useState<ProductFormData>(
     initial ? {
       name: initial.name, sku: initial.sku, category: initial.category ?? '',
@@ -23,6 +28,11 @@ function ProductModal({ initial, onClose, onSave }: { initial?: any; onClose: ()
     } : emptyForm
   );
   const [saving, setSaving] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(initial?.imageUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const imgInputRef = useRef<HTMLInputElement>(null);
+
   const set = (k: keyof ProductFormData, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,6 +55,36 @@ function ProductModal({ initial, onClose, onSave }: { initial?: any; onClose: ()
     }
   };
 
+  const handleImageFile = async (file: File) => {
+    if (!initial?.id) return;
+    setUploading(true);
+    try {
+      const res = await productsApi.uploadImage(initial.id, file);
+      setImageUrl(res.data.data.imageUrl);
+      onImageUploaded?.();
+      toast.success('Image uploaded!');
+    } catch {
+      toast.error('Image upload failed. Check your S3 bucket.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveImage = async () => {
+    if (!initial?.id) return;
+    setUploading(true);
+    try {
+      await productsApi.deleteImage(initial.id);
+      setImageUrl(null);
+      onImageUploaded?.();
+      toast.success('Image removed');
+    } catch {
+      toast.error('Failed to remove image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal slide-up">
@@ -54,6 +94,78 @@ function ProductModal({ initial, onClose, onSave }: { initial?: any; onClose: ()
         </div>
         <form onSubmit={handleSubmit}>
           <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+            {/* ── Image upload zone (edit mode only) ── */}
+            {initial && (
+              <div className="form-group">
+                <label className="form-label">Product Image</label>
+                {imageUrl ? (
+                  <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    <img src={imageUrl} alt="Product" className="img-preview" />
+                    <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 6 }}>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={() => imgInputRef.current?.click()}
+                        disabled={uploading}
+                        style={{ backdropFilter: 'blur(6px)', background: 'rgba(0,0,0,0.5)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}
+                      >
+                        {uploading ? <Loader2 size={12} className="animate-spin" /> : <ImagePlus size={12} />}
+                        Replace
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-sm"
+                        onClick={handleRemoveImage}
+                        disabled={uploading}
+                        style={{ backdropFilter: 'blur(6px)', background: 'rgba(0,0,0,0.5)' }}
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    className={`img-dropzone${dragOver ? ' drag-over' : ''}`}
+                    onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                    onDragLeave={() => setDragOver(false)}
+                    onDrop={e => {
+                      e.preventDefault(); setDragOver(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleImageFile(file);
+                    }}
+                    onClick={() => imgInputRef.current?.click()}
+                  >
+                    {uploading ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '10px 0' }}>
+                        <Loader2 size={24} className="animate-spin" style={{ color: 'var(--accent-blue)' }} />
+                        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Uploading to S3…</span>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '10px 0', pointerEvents: 'none' }}>
+                        <ImagePlus size={24} style={{ color: 'var(--text-muted)' }} />
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
+                          {dragOver ? 'Drop to upload' : 'Drag & drop or click to browse'}
+                        </span>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>JPG, PNG, WebP — max 5 MB</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={imgInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    e.target.value = '';
+                    if (file) handleImageFile(file);
+                  }}
+                />
+              </div>
+            )}
+
             <div className="grid grid-2">
               <div className="form-group">
                 <label className="form-label">Product Name *</label>
@@ -98,6 +210,7 @@ function ProductModal({ initial, onClose, onSave }: { initial?: any; onClose: ()
           </div>
         </form>
       </div>
+
     </div>
   );
 }
@@ -360,6 +473,7 @@ export default function ProductsPage() {
         <ProductModal
           initial={editProduct}
           onClose={() => setShowModal(false)}
+          onImageUploaded={() => qc.invalidateQueries({ queryKey: ['products'] })}
           onSave={async (d) => {
             if (editProduct) await updateMutation.mutateAsync({ id: editProduct.id, ...d });
             else await createMutation.mutateAsync(d);

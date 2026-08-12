@@ -1,8 +1,9 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../hooks/useTheme';
 import {
-  LayoutDashboard, Users, Package, FileText, LogOut, Building2, UserCog,
+  LayoutDashboard, Users, Package, FileText, LogOut, Building2, UserCog, Sun, Moon,
 } from 'lucide-react';
 
 interface NavItemProps {
@@ -23,6 +24,39 @@ function SidebarNavItem({ to, icon, label }: NavItemProps) {
   );
 }
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      onClick={toggleTheme}
+      title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        width: '100%', padding: '9px 12px',
+        background: 'transparent',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-sm)',
+        color: 'var(--text-muted)',
+        cursor: 'pointer',
+        fontSize: 12.5, fontWeight: 500,
+        transition: 'all 0.2s ease',
+        marginTop: 6,
+      }}
+      onMouseEnter={e => {
+        (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border-strong)';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+      }}
+      onMouseLeave={e => {
+        (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)';
+        (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-muted)';
+      }}
+    >
+      {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+      {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+    </button>
+  );
+}
+
 export default function Sidebar() {
   const { user, logout, isAdmin, hasRole } = useAuth();
   const navigate = useNavigate();
@@ -40,8 +74,8 @@ export default function Sidebar() {
     .slice(0, 2) ?? 'U';
 
   const roleColors: Record<string, string> = {
-    ADMIN: 'badge-purple',
-    SALES: 'badge-blue',
+    ADMIN: 'badge-blue',
+    SALES: 'badge-teal',
     WAREHOUSE: 'badge-amber',
     ACCOUNTS: 'badge-green',
   };
@@ -115,6 +149,7 @@ export default function Sidebar() {
             <LogOut size={15} />
           </button>
         </div>
+        <ThemeToggle />
       </div>
     </aside>
   );
