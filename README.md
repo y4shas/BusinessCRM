@@ -33,6 +33,8 @@ cd BusinessCRM
 cd backend
 cp .env.example .env
 # Edit .env — for local dev, use the local MySQL DATABASE_URL (see .env.example)
+# Note: For product images, provide AWS_REGION and AWS_S3_BUCKET_NAME.
+# On EC2, AWS credentials are automatically resolved via IAM Instance Profile.
 npm install
 npx prisma generate
 npx prisma migrate dev --name init

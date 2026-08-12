@@ -108,7 +108,7 @@ export default function LoginPage() {
         {SHOW_TEST_CREDENTIALS && (
           <div className="test-credentials">
             <div className="test-credentials-header">
-              🧪 Test Accounts (Dev / Staging Only)
+              Test Accounts (Dev / Staging Only)
             </div>
             {TEST_ACCOUNTS.map((acc) => (
               <div key={acc.role} className="test-cred-item">
